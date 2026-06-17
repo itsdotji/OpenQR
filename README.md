@@ -38,7 +38,7 @@ OPEN QR is a single-file web app for creating, styling, and exporting QR codes w
 
 # Tech Stack
 
-* Vanilla HTML, CSS, and JavaScript — no build step required.
+* Vanilla HTML, CSS, and JavaScript - no build step required.
 * "qr-code-styling" - handles QR generation and visual styling.
 * "jsPDF" - handles PDF report generation.
 * Google Fonts ("Inter") for typography.
