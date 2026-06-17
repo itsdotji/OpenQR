@@ -59,6 +59,10 @@ The footer of the app links to dynamically generated info pages, opened as stand
 * *License* - MIT License.
 * *Open Source* - lists core dependencies and notes on contributing.
 
+# Support 
+
+
+
 # License
 
 Released under the *MIT License*. See the in-app "License" page for full terms.
@@ -66,3 +70,7 @@ Released under the *MIT License*. See the in-app "License" page for full terms.
 # Author
 
 Developed by *itsdotji (Nikhil Kumar)*.
+
+# LIVE ON INTERNET 
+
+openqrdev.vercel.app
