@@ -4,7 +4,7 @@
 
 OPEN QR is a single-file web app for creating, styling, and exporting QR codes without sending any data to a server. Everything - text encoding, styling, logo embedding, and PDF export - happens locally on the user's device.
 
-# Why OPEN QR
+# Why OPEN QR ❓
 
 * "100% client-side" - no backend, no database, no telemetry.
 * No cookies, no analytics scripts, no third-party tracking.
@@ -59,18 +59,25 @@ The footer of the app links to dynamically generated info pages, opened as stand
 * *License* - MIT License.
 * *Open Source* - lists core dependencies and notes on contributing.
 
-# Support 
+# 🤝 Contribution 
+
+Contributions, feature requests, and bug reports are welcome.
+
+If you'd like to improve OPEN QR, feel free to fork the repository and submit a pull request.
 
 
-
-# License
+# 📄 License
 
 Released under the *MIT License*. See the in-app "License" page for full terms.
 
-# Author
+# ❤️ Support 
+
+If you find this project useful, consider giving it a ⭐ on GitHub and sharing it with others.
+
+# 💻 Author
 
 Developed by *itsdotji (Nikhil Kumar)*.
 
-# LIVE ON INTERNET 
+# 🌐 LIVE ON INTERNET 
 
-openqrdev.vercel.app
+https://openqrdev.vercel.app
