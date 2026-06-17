@@ -74,10 +74,12 @@ Released under the *MIT License*. See the in-app "License" page for full terms.
 
 If you find this project useful, consider giving it a ⭐ on GitHub and sharing it with others.
 
-# 💻 Author
-
-Developed by *itsdotji (Nikhil Kumar)*.
 
 # 🌐 LIVE ON INTERNET 
 
 https://openqrdev.vercel.app
+
+
+# 💻 Author
+
+Developed by *itsdotji (Nikhil Kumar)*.
