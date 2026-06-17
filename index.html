@@ -1,0 +1,1578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OPEN QR - Enterprise Offline QR Generation Utility</title>
+  
+  <!-- Corporate Grade Typography Integration -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Secure Offline QR Library CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
+  <!-- Secure Offline PDF Export CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style>
+    :root {
+      --bg-primary: #ffffff;
+      --bg-light-blue: #f0f7ff;
+      --bg-gradient: linear-gradient(135deg, #ffffff 0%, #f4f9ff 50%, #e0f2fe 100%);
+      --accent-green: #059669; /* Refined corporate emerald green */
+      --accent-green-hover: #047857;
+      --accent-green-tint: #ecfdf5;
+      --text-black: #0f172a; /* Corporate slate/black */
+      --text-muted: #475569;
+      --white: #ffffff;
+      --border-color: #cbd5e1;
+      --border-focus: #94a3b8;
+      --white: #ffffff;
+      --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+      --transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-black);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+    }
+
+    /* Corporate Header Navigation with spacing fix */
+    header {
+      background: var(--white);
+      border-bottom: 1px solid var(--border-color);
+      padding: 18px 32px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .header-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 32px; /* Prevent crowding between elements */
+      flex-wrap: wrap; /* Gracefully wraps on tight viewports */
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+
+    .brand-accent {
+      color: var(--accent-green);
+    }
+
+    .badge-offline {
+      background: var(--text-black);
+      color: var(--accent-green);
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 5px 12px;
+      border-radius: var(--radius-sm);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      flex-shrink: 0;
+    }
+
+    /* Enterprise Multi-Column Architecture */
+    main {
+      flex: 1;
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 32px 32px;
+      display: grid;
+      grid-template-columns: 1.3fr 0.7fr;
+      gap: 32px;
+    }
+
+    /* Left Side: System Controls & Parameters */
+    .controls-pane {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .section-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-color);
+      padding: 24px;
+      box-shadow: var(--card-shadow);
+      transition: var(--transition);
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-black);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title::before {
+      content: '';
+      display: inline-block;
+      width: 3px;
+      height: 14px;
+      background: var(--accent-green);
+      border-radius: 1px;
+    }
+
+    .section-content {
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .section-content.collapsed {
+      display: none;
+    }
+
+    .collapse-icon {
+      font-size: 0.75rem;
+      font-weight: bold;
+      color: var(--text-muted);
+      transition: var(--transition);
+    }
+
+    .collapsed .collapse-icon {
+      transform: rotate(-90deg);
+    }
+
+    /* Managed Input Tab Array */
+    .type-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 14px;
+    }
+
+    .tab-btn {
+      background: var(--white);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 6px 14px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .tab-btn:hover {
+      border-color: var(--border-focus);
+      color: var(--text-black);
+    }
+
+    .tab-btn.active {
+      background: var(--accent-green-tint);
+      color: var(--accent-green);
+      border-color: var(--accent-green);
+    }
+
+    /* Structured Input Fields */
+    .input-field-group {
+      display: none;
+    }
+
+    .input-field-group.active {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: var(--text-muted);
+    }
+
+    input[type="text"],
+    input[type="tel"],
+    input[type="email"],
+    input[type="password"],
+    input[type="url"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 10px 14px;
+      font-size: 0.9rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-color);
+      background: var(--white);
+      outline: none;
+      transition: var(--transition);
+      color: var(--text-black);
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--text-black);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .checkbox-row input {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--accent-green);
+    }
+
+    /* Compact Manageable Grid Layouts */
+    .grid-presets {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 10px;
+    }
+
+    .preset-item {
+      background: var(--white);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 10px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      transition: var(--transition);
+      text-align: center;
+    }
+
+    .preset-item:hover {
+      border-color: var(--border-focus);
+    }
+
+    .preset-item.active {
+      border-color: var(--accent-green);
+      background: var(--accent-green-tint);
+    }
+
+    .theme-circle {
+      width: 24px;
+      height: 24px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .shape-preview {
+      width: 18px;
+      height: 18px;
+      background: var(--text-black);
+    }
+
+    .shape-preview.dot { border-radius: 50%; }
+    .shape-preview.rounded { border-radius: 4px; }
+    .shape-preview.extra-rounded { border-radius: 50% 50%; }
+    .shape-preview.classy { border-radius: 8px 0; }
+    .shape-preview.classy-rounded { border-radius: 8px 0; }
+
+    /* Compact manageable colors matrix */
+    .colors-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .color-dot {
+      width: 28px;
+      height: 28px;
+      border-radius: 4px;
+      border: 1px solid var(--border-color);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .color-dot:hover {
+      transform: scale(1.08);
+    }
+
+    .color-dot.active {
+      border-color: var(--accent-green);
+      outline: 2px solid var(--accent-green);
+      outline-offset: 1px;
+    }
+
+    /* Advanced controls panel */
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+    }
+
+    .slider-row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .slider-row input[type="range"] {
+      accent-color: var(--accent-green);
+      cursor: pointer;
+    }
+
+    /* Right Sticky Console Preview */
+    .preview-pane {
+      position: sticky;
+      top: 100px;
+      height: fit-content;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .preview-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-color);
+      padding: 32px;
+      text-align: center;
+      box-shadow: var(--card-shadow);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .qr-canvas-holder {
+      background: var(--white);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--border-color);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .preview-actions {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    /* High Trust Call-To-Action buttons */
+    .btn-action {
+      width: 100%;
+      padding: 12px 18px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: none;
+      transition: var(--transition);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .btn-green {
+      background: var(--accent-green);
+      color: var(--white);
+    }
+
+    .btn-green:hover {
+      background: var(--accent-green-hover);
+    }
+
+    .btn-black {
+      background: var(--text-black);
+      color: var(--white);
+    }
+
+    .btn-black:hover {
+      background: #1e293b;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-black);
+    }
+
+    .btn-outline:hover {
+      background: var(--bg-light-blue);
+      border-color: var(--border-focus);
+    }
+
+    /* Professional Status Toast */
+    .toast-status {
+      visibility: hidden;
+      min-width: 250px;
+      background-color: var(--text-black);
+      color: var(--accent-green);
+      text-align: center;
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      position: fixed;
+      z-index: 1000;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .toast-status.show {
+      visibility: visible;
+      animation: fadeInUp 0.25s forwards, fadeOut 0.25s 2.5s forwards;
+    }
+
+    /* Structured Corporate Footer Map */
+    footer {
+      background: #0f172a;
+      color: #94a3b8;
+      padding: 48px 32px;
+      margin-top: 64px;
+      border-top: 4px solid var(--accent-green);
+    }
+
+    .footer-wrapper {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 32px;
+    }
+
+    .footer-grid-nav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 32px;
+    }
+
+    .footer-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .footer-col h4 {
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #f8fafc;
+    }
+
+    .footer-links-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .footer-link-item {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .footer-link-item:hover {
+      color: var(--accent-green);
+    }
+
+    .social-matrix {
+      display: flex;
+      gap: 16px;
+    }
+
+    .icon-anchor {
+      color: #94a3b8;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .icon-anchor:hover {
+      transform: translateY(-2px);
+      color: var(--accent-green);
+    }
+
+    .copyright-statement {
+      font-size: 0.75rem;
+      color: #64748b;
+      text-align: center;
+      line-height: 1.6;
+      border-top: 1px solid #1e293b;
+      padding-top: 24px;
+      width: 100%;
+    }
+
+    .copyright-romantic {
+      color: var(--accent-green);
+      font-weight: 500;
+    }
+
+    /* Keyframe Animations */
+    @keyframes fadeInUp {
+      from { bottom: 15px; opacity: 0; }
+      to { bottom: 30px; opacity: 1; }
+    }
+
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+
+    /* Responsive Mobile Layout Adaptations */
+    @media (max-width: 1024px) {
+      main {
+        grid-template-columns: 1fr;
+        display: flex;
+        flex-direction: column-reverse;
+      }
+      .preview-pane {
+        position: static;
+        width: 100%;
+      }
+      .grid-presets {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      }
+    }
+
+    @media (max-width: 640px) {
+      .header-container {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+      }
+      .brand {
+        font-size: 1.3rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      main {
+        padding: 16px;
+      }
+      .grid-presets {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+      .footer-links-row {
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Corporate Header -->
+  <header>
+    <div class="header-container">
+      <div class="brand">
+        OPEN <span class="brand-accent">QR</span>
+      </div>
+      <div class="badge-offline">Secure Local Engine</div>
+    </div>
+  </header>
+
+  <!-- Application Space -->
+  <main>
+    <!-- Left Segment: Managed Controls Group -->
+    <div class="controls-pane">
+      
+      <!-- Module 01: QR Parameters Input -->
+      <section class="section-card">
+        <div class="section-header" onclick="toggleSection('module-data')">
+          <h2 class="section-title">01 / Data Ingestion Module</h2>
+          <span class="collapse-icon">▲</span>
+        </div>
+        
+        <div class="section-content" id="module-data">
+          <!-- Input selection tabs -->
+          <div class="type-tabs">
+            <button class="tab-btn active" data-type="text">URL/Text</button>
+            <button class="tab-btn" data-type="wifi">Wi-Fi</button>
+            <button class="tab-btn" data-type="vcard">vCard Contact</button>
+            <button class="tab-btn" data-type="phone">Telephone</button>
+            <button class="tab-btn" data-type="email">Email System</button>
+            <button class="tab-btn" data-type="sms">SMS Protocol</button>
+            <button class="tab-btn" data-type="whatsapp">WhatsApp Direct</button>
+          </div>
+
+          <div id="dynamic-inputs">
+            <!-- URL / Plain Text -->
+            <div class="input-field-group active" id="group-text">
+              <label for="input-raw-text">Paste Destination URL or Raw Text</label>
+              <textarea id="input-raw-text" placeholder="https://github.com/itsdotji">https://github.com/itsdotji</textarea>
+            </div>
+
+            <!-- Wi-Fi Profile -->
+            <div class="input-field-group" id="group-wifi">
+              <label for="input-wifi-ssid">SSID (Network Name)</label>
+              <input type="text" id="input-wifi-ssid" placeholder="Enterprise_Network_Alpha">
+              
+              <div class="grid-2">
+                <div>
+                  <label for="input-wifi-pass">Network Passphrase</label>
+                  <input type="password" id="input-wifi-pass" placeholder="WPA2 Password">
+                </div>
+                <div>
+                  <label for="input-wifi-enc">Encryption Model</label>
+                  <select id="input-wifi-enc">
+                    <option value="WPA">WPA/WPA2 Professional</option>
+                    <option value="WEP">WEP Legacy</option>
+                    <option value="nopass">None (Unencrypted)</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div class="checkbox-row">
+                <input type="checkbox" id="input-wifi-hidden">
+                <label for="input-wifi-hidden">This network SSID is hidden</label>
+              </div>
+            </div>
+
+            <!-- Contact vCard -->
+            <div class="input-field-group" id="group-vcard">
+              <div class="grid-2">
+                <div>
+                  <label for="v-fname">Given Name</label>
+                  <input type="text" id="v-fname" placeholder="Nikhil">
+                </div>
+                <div>
+                  <label for="v-lname">Surname</label>
+                  <input type="text" id="v-lname" placeholder="Kumar">
+                </div>
+              </div>
+              <div class="grid-2">
+                <div>
+                  <label for="v-org">Company Name</label>
+                  <input type="text" id="v-org" placeholder="Enterprise Systems Development">
+                </div>
+                <div>
+                  <label for="v-title">Corporate Title</label>
+                  <input type="text" id="v-title" placeholder="Principal Architect">
+                </div>
+              </div>
+              <label for="v-phone">Mobile Number</label>
+              <input type="tel" id="v-phone" placeholder="+91 99999 99999">
+              <label for="v-email">Work Email</label>
+              <input type="email" id="v-email" placeholder="nikhil.kumar@example.com">
+              <label for="v-url">Corporate Website URL</label>
+              <input type="url" id="v-url" placeholder="https://github.com/itsdotji">
+            </div>
+
+            <!-- Telephone Link -->
+            <div class="input-field-group" id="group-phone">
+              <label for="input-phone-num">Direct Dial Destination Phone Number</label>
+              <input type="tel" id="input-phone-num" placeholder="e.g. +919999999999">
+            </div>
+
+            <!-- Email Trigger -->
+            <div class="input-field-group" id="group-email">
+              <label for="input-mail-to">Workplace Target Email Address</label>
+              <input type="email" id="input-mail-to" placeholder="team@openqr.corp">
+              <label for="input-mail-sub">Automated Subject Header</label>
+              <input type="text" id="input-mail-sub" placeholder="Inquiry: Enterprise Solutions">
+              <label for="input-mail-body">Default Email Narrative Body</label>
+              <textarea id="input-mail-body" placeholder="Formulate precompiled content logs..."></textarea>
+            </div>
+
+            <!-- SMS Config -->
+            <div class="input-field-group" id="group-sms">
+              <label for="input-sms-num">Mobile SMS Target Number</label>
+              <input type="tel" id="input-sms-num" placeholder="e.g. +15551234567">
+              <label for="input-sms-msg">Preset Text Contents</label>
+              <textarea id="input-sms-msg" placeholder="Formulate your precomposed SMS text..."></textarea>
+            </div>
+
+            <!-- WhatsApp Routing -->
+            <div class="input-field-group" id="group-whatsapp">
+              <label for="input-wa-num">WhatsApp Phone Number (Including Country Code, No Spaces)</label>
+              <input type="tel" id="input-wa-num" placeholder="e.g. 919999999999">
+              <label for="input-wa-msg">Default Instant Routing Text</label>
+              <textarea id="input-wa-msg" placeholder="Type WhatsApp message contents..."></textarea>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Module 02: Theme Compliance Manager -->
+      <section class="section-card">
+        <div class="section-header" onclick="toggleSection('module-themes')">
+          <h2 class="section-title">02 / Theme Compliance Presets</h2>
+          <span class="collapse-icon">▲</span>
+        </div>
+        <div class="section-content" id="module-themes">
+          <div class="grid-presets" id="container-themes">
+            <!-- 11 Corporate themes populated programmatically -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Module 03: Shape Compliance Manager -->
+      <section class="section-card">
+        <div class="section-header" onclick="toggleSection('module-shapes')">
+          <h2 class="section-title">03 / Geometric Pattern Profiles</h2>
+          <span class="collapse-icon">▲</span>
+        </div>
+        <div class="section-content" id="module-shapes">
+          <div class="grid-presets" id="container-styles">
+            <!-- 10 Geometrical dot styles populated programmatically -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Module 04: Corporate Color Specifications -->
+      <section class="section-card">
+        <div class="section-header" onclick="toggleSection('module-colors')">
+          <h2 class="section-title">04 / Corporate Identity Colors</h2>
+          <span class="collapse-icon">▲</span>
+        </div>
+        <div class="section-content" id="module-colors">
+          <div class="colors-strip" id="container-colors">
+            <!-- 11 Brand colors populated programmatically -->
+          </div>
+          
+          <hr style="margin: 16px 0; border: none; border-top: 1px solid var(--border-color);">
+          
+          <!-- Manual Color Control Board -->
+          <div class="controls-grid">
+            <div>
+              <label for="color-picker-fg">Custom Pattern Fill</label>
+              <input type="color" id="color-picker-fg" value="#0f172a" style="height: 38px; padding: 2px; cursor: pointer; border-radius: var(--radius-sm);">
+            </div>
+            <div>
+              <label for="color-picker-bg">Custom Canvas Base</label>
+              <input type="color" id="color-picker-bg" value="#ffffff" style="height: 38px; padding: 2px; cursor: pointer; border-radius: var(--radius-sm);">
+            </div>
+            <div>
+              <label for="color-picker-corners">Custom Frame Color</label>
+              <input type="color" id="color-picker-corners" value="#0f172a" style="height: 38px; padding: 2px; cursor: pointer; border-radius: var(--radius-sm);">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Module 05: Brand Logo Integrator -->
+      <section class="section-card">
+        <div class="section-header" onclick="toggleSection('module-branding')">
+          <h2 class="section-title">05 / Brand Mark Utilities</h2>
+          <span class="collapse-icon">▲</span>
+        </div>
+        <div class="section-content" id="module-branding">
+          <div style="display: flex; flex-direction: column; gap: 14px;">
+            <div>
+              <label for="logo-uploader" style="display: block; margin-bottom: 8px;">Upload Corporate Logotype (Processes Offline)</label>
+              <input type="file" id="logo-uploader" accept="image/*" style="display: none;">
+              <div style="display: flex; gap: 10px;">
+                <button class="btn-action btn-outline" style="padding: 10px 16px; font-size: 0.8rem;" onclick="document.getElementById('logo-uploader').click()">Upload File</button>
+                <button class="btn-action btn-outline" style="padding: 10px 16px; font-size: 0.8rem; border-color: #ef4444; color: #ef4444;" id="btn-logo-remove">Clear Selection</button>
+              </div>
+            </div>
+
+            <div class="controls-grid">
+              <div class="slider-row">
+                <label id="lbl-margin" for="slider-margin">Margin Buffer: 15px</label>
+                <input type="range" id="slider-margin" min="0" max="40" value="15">
+              </div>
+              <div class="slider-row">
+                <label id="lbl-logo-size" for="slider-logo-size">Center Scale: 0.35</label>
+                <input type="range" id="slider-logo-size" min="0.1" max="0.5" step="0.05" value="0.35">
+              </div>
+            </div>
+
+            <div class="controls-grid">
+              <div>
+                <label for="select-error-correction">Error Resistance Matrix</label>
+                <select id="select-error-correction">
+                  <option value="L">Level L (Low - 7% loss recovery)</option>
+                  <option value="M">Level M (Medium - 15% loss recovery)</option>
+                  <option value="Q" selected>Level Q (High - 25% recommended for logos)</option>
+                  <option value="H">Level H (Maximum - 30% safety allowance)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Right Segment: Sticky Output Console -->
+    <div class="preview-pane">
+      <div class="preview-card">
+        <h3 style="font-size: 0.8rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted);">Console Output Preview</h3>
+        
+        <div class="qr-canvas-holder" id="canvas-target">
+          <!-- Main QR Code Target Canvas -->
+        </div>
+
+        <div class="preview-actions">
+          <button class="btn-action btn-green" id="btn-save-image">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            Export PNG Image
+          </button>
+          
+          <button class="btn-action btn-black" id="btn-save-pdf">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            Export PDF Document
+          </button>
+
+          <button class="btn-action btn-outline" id="btn-share-qr">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.684 10.748a3.001 3.001 0 110 2.504m0-2.504a3.001 3.001 0 110-2.504m0 2.504l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 110 5.367m0-5.367a3 3 0 110 5.367m0 0a3 3 0 110 5.367"/></svg>
+            Share Assets
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Notification Dispatcher Toast -->
+  <div class="toast-status" id="status-toast">Enterprise Suite Engaged</div>
+
+  <!-- Corporate Structured Footer Map -->
+  <footer>
+    <div class="footer-wrapper">
+      
+      <div class="footer-grid-nav">
+        <!-- Quick Links in Footer Only -->
+        <div class="footer-col">
+          <h4>Utility Directory</h4>
+          <div class="footer-links-row">
+            <button class="footer-link-item" onclick="handleFooterNavigation('home')">Home</button>
+            <button class="footer-link-item" onclick="handleFooterNavigation('about')">About Us</button>
+            <button class="footer-link-item" onclick="handleFooterNavigation('privacy')">Privacy Policy</button>
+            <button class="footer-link-item" onclick="handleFooterNavigation('terms')">Terms &amp; Condition</button>
+            <button class="footer-link-item" onclick="handleFooterNavigation('licence')">MIT Licence</button>
+            <button class="footer-link-item" onclick="handleFooterNavigation('open-source')">Open Source</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Developer Contribution Module -->
+      <div class="footer-col" style="border-top: 1px solid #1e293b; padding-top: 24px; width: 100%;">
+        <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #f8fafc; margin-bottom: 12px;">Development Contribution Portal</div>
+        <a href="https://github.com/itsdotji" target="_blank" class="icon-anchor" aria-label="GitHub Repository Link">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+          </svg>
+        </a>
+      </div>
+
+      <!-- Verified Social Identity Rows -->
+      <div class="social-matrix">
+        <a href="https://github.com/itsdotji" target="_blank" class="icon-anchor" aria-label="Github Identity">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+          </svg>
+        </a>
+        <a href="https://www.linkedin.com/in/nikhil-kumar-31b914341" target="_blank" class="icon-anchor" aria-label="LinkedIn Professional Network Link">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.779-1.75-1.75s.784-1.75 1.75-1.75 1.75.779 1.75 1.75-.784 1.75-1.75 1.75zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+          </svg>
+        </a>
+        <a href="https://www.producthunt.com/@itsdotji" target="_blank" class="icon-anchor" aria-label="Product Hunt Creator Network Link">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M13.6 8.4h-2.8v3.2h2.8c.884 0 1.6-.716 1.6-1.6s-.716-1.6-1.6-1.6zm0-4.4h-6.8v16h4v-5.6h2.8c3.093 0 5.6-2.507 5.6-5.6s-2.507-5.6-5.6-5.6zM12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2z"/>
+          </svg>
+        </a>
+      </div>
+
+      <!-- Compliance Text Formatting -->
+      <div class="copyright-statement">
+        &copy; OPEN QR. <span class="copyright-romantic">"We are Quiet Romantic because of You"</span>. All Rights Reserved.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Corporate Configuration Engine -->
+  <script>
+    // Managed Presets Configurations (11 Themes, 10 Styles, 11 Colors)
+    const presetThemes = [
+      { name: "Slate Corporate", fg: "#0f172a", bg: "#ffffff", dot: "square", corner: "square", cornerDot: "square" },
+      { name: "Emerald Prime", fg: "#059669", bg: "#f0fdf4", dot: "rounded", corner: "rounded", cornerDot: "rounded" },
+      { name: "Ice Breeze", fg: "#0284c7", bg: "#f0f9ff", dot: "classy-rounded", corner: "rounded", cornerDot: "rounded" },
+      { name: "Forest Canopy", fg: "#14532d", bg: "#ecfdf5", dot: "dots", corner: "dot", cornerDot: "dot" },
+      { name: "Deep Cobalt", fg: "#1d4ed8", bg: "#eff6ff", dot: "square", corner: "rounded", cornerDot: "rounded" },
+      { name: "Corporate Violet", fg: "#6d28d9", bg: "#faf5ff", dot: "classy", corner: "square", cornerDot: "square" },
+      { name: "Executive Charcoal", fg: "#334155", bg: "#f8fafc", dot: "rounded", corner: "rounded", cornerDot: "rounded" },
+      { name: "Bespoke Amber", fg: "#b45309", bg: "#fffbeb", dot: "dots", corner: "rounded", cornerDot: "dot" },
+      { name: "Quiet Romance", fg: "#db2777", bg: "#fff1f2", dot: "rounded", corner: "extra-rounded", cornerDot: "dot" },
+      { name: "Sunset Executive", fg: "#c2410c", bg: "#fff7ed", dot: "extra-rounded", corner: "rounded", cornerDot: "rounded" },
+      { name: "Midnight Premium", fg: "#000000", bg: "#f1f5f9", dot: "classy-rounded", corner: "extra-rounded", cornerDot: "rounded" }
+    ];
+
+    const presetStyles = [
+      { name: "Symmetric Block", dot: "square", corner: "square", cornerDot: "square" },
+      { name: "Refined Soft", dot: "rounded", corner: "rounded", cornerDot: "rounded" },
+      { name: "Circular Grid", dot: "dots", corner: "dot", cornerDot: "dot" },
+      { name: "Deco Modern", dot: "classy", corner: "square", cornerDot: "square" },
+      { name: "Sleek Capsule", dot: "extra-rounded", corner: "extra-rounded", cornerDot: "rounded" },
+      { name: "Unified Stream", dot: "classy-rounded", corner: "rounded", cornerDot: "dot" },
+      { name: "Double Frame", dot: "square", corner: "extra-rounded", cornerDot: "rounded" },
+      { name: "Pixel Classic", dot: "square", corner: "dot", cornerDot: "square" },
+      { name: "Leaf Contour", dot: "extra-rounded", corner: "dot", cornerDot: "dot" },
+      { name: "Vanguard Line", dot: "classy-rounded", corner: "square", cornerDot: "dot" }
+    ];
+
+    const presetColors = [
+      { name: "Slate Primary", hex: "#0f172a" },
+      { name: "Emerald Identity", hex: "#059669" },
+      { name: "Trust Blue", hex: "#1d4ed8" },
+      { name: "Teal Corporate", hex: "#0f766e" },
+      { name: "Modern Amber", hex: "#b45309" },
+      { name: "Classic Navy", hex: "#1e3a8a" },
+      { name: "Graphite Dark", hex: "#475569" },
+      { name: "Premium Crimson", hex: "#b91c1c" },
+      { name: "Warm Terracotta", hex: "#c2410c" },
+      { name: "Romantic Magenta", hex: "#db2777" },
+      { name: "Absolute Black", hex: "#000000" }
+    ];
+
+    // Master configuration settings container
+    let config = {
+      width: 320,
+      height: 320,
+      type: "canvas",
+      data: "https://github.com/itsdotji",
+      image: "",
+      margin: 15,
+      qrOptions: {
+        typeNumber: "0",
+        mode: "Byte",
+        errorCorrectionLevel: "Q"
+      },
+      imageOptions: {
+        hideBackgroundDots: true,
+        imageSize: 0.35,
+        margin: 4,
+        crossOrigin: "anonymous"
+      },
+      dotsOptions: {
+        color: "#0f172a",
+        type: "square"
+      },
+      backgroundOptions: {
+        color: "#ffffff"
+      },
+      cornersSquareOptions: {
+        color: "#0f172a",
+        type: "square"
+      },
+      cornersDotOptions: {
+        color: "#0f172a",
+        type: "square"
+      }
+    };
+
+    let qrEngine = null;
+
+    // Bootstrapping operations
+    document.addEventListener("DOMContentLoaded", () => {
+      renderPresetUI();
+      initializeTabs();
+      bindInputEvents();
+      setupFileUploading();
+      
+      // Instantiate master styling object
+      qrEngine = new QRCodeStyling(config);
+      const canvasTarget = document.getElementById("canvas-target");
+      canvasTarget.innerHTML = "";
+      qrEngine.append(canvasTarget);
+      
+      triggerQRUpdate();
+    });
+
+    // Populate Presets inside DOM
+    function renderPresetUI() {
+      // Themes
+      const themeContainer = document.getElementById("container-themes");
+      presetThemes.forEach((item, index) => {
+        const btn = document.createElement("button");
+        btn.className = `preset-item theme-item ${index === 0 ? 'active' : ''}`;
+        btn.innerHTML = `
+          <div class="theme-circle" style="background-color: ${item.bg};">
+            <span style="color: ${item.fg}; font-size: 0.9rem; font-weight: bold;">■</span>
+          </div>
+          <span style="font-size: 0.7rem; font-weight: 600; color: var(--text-black);">${item.name}</span>
+        `;
+        btn.addEventListener("click", () => {
+          document.querySelectorAll(".theme-item").forEach(el => el.classList.remove("active"));
+          btn.classList.add("active");
+          
+          config.dotsOptions.color = item.fg;
+          config.backgroundOptions.color = item.bg;
+          config.cornersSquareOptions.color = item.fg;
+          config.cornersDotOptions.color = item.fg;
+          
+          config.dotsOptions.type = item.dot;
+          config.cornersSquareOptions.type = item.corner;
+          config.cornersDotOptions.type = item.cornerDot;
+          
+          // Update manual inputs
+          document.getElementById("color-picker-fg").value = item.fg;
+          document.getElementById("color-picker-bg").value = item.bg;
+          document.getElementById("color-picker-corners").value = item.fg;
+          
+          triggerQRUpdate();
+        });
+        themeContainer.appendChild(btn);
+      });
+
+      // Geometrical Styles
+      const styleContainer = document.getElementById("container-styles");
+      presetStyles.forEach((item, index) => {
+        const btn = document.createElement("button");
+        btn.className = `preset-item style-item ${index === 0 ? 'active' : ''}`;
+        btn.innerHTML = `
+          <div class="theme-circle" style="background: var(--bg-light-blue);">
+            <div class="shape-preview ${item.dot}"></div>
+          </div>
+          <span style="font-size: 0.7rem; font-weight: 600; color: var(--text-black);">${item.name}</span>
+        `;
+        btn.addEventListener("click", () => {
+          document.querySelectorAll(".style-item").forEach(el => el.classList.remove("active"));
+          btn.classList.add("active");
+          
+          config.dotsOptions.type = item.dot;
+          config.cornersSquareOptions.type = item.corner;
+          config.cornersDotOptions.type = item.cornerDot;
+          
+          triggerQRUpdate();
+        });
+        styleContainer.appendChild(btn);
+      });
+
+      // Colors Strip
+      const colorsContainer = document.getElementById("container-colors");
+      presetColors.forEach((item, index) => {
+        const dot = document.createElement("button");
+        dot.className = `color-dot ${index === 0 ? 'active' : ''}`;
+        dot.style.backgroundColor = item.hex;
+        dot.title = item.name;
+        dot.addEventListener("click", () => {
+          document.querySelectorAll(".color-dot").forEach(el => el.classList.remove("active"));
+          dot.classList.add("active");
+          
+          config.dotsOptions.color = item.hex;
+          config.cornersSquareOptions.color = item.hex;
+          config.cornersDotOptions.color = item.hex;
+          
+          document.getElementById("color-picker-fg").value = item.hex;
+          document.getElementById("color-picker-corners").value = item.hex;
+          
+          triggerQRUpdate();
+        });
+        colorsContainer.appendChild(dot);
+      });
+    }
+
+    // Toggle Collapsible Settings Modules
+    function toggleSection(sectionId) {
+      const content = document.getElementById(sectionId);
+      const parent = content.parentElement;
+      content.classList.toggle("collapsed");
+      parent.classList.toggle("collapsed");
+    }
+
+    // Initialize Tab Switching
+    function initializeTabs() {
+      const tabs = document.querySelectorAll(".tab-btn");
+      tabs.forEach(tab => {
+        tab.addEventListener("click", () => {
+          tabs.forEach(t => t.classList.remove("active"));
+          tab.classList.add("active");
+          
+          const type = tab.dataset.type;
+          document.querySelectorAll(".input-field-group").forEach(group => {
+            group.classList.remove("active");
+          });
+          document.getElementById(`group-${type}`).classList.add("active");
+          
+          triggerQRUpdate();
+        });
+      });
+    }
+
+    // Input elements bindings
+    function bindInputEvents() {
+      const inputs = [
+        "input-raw-text", "input-wifi-ssid", "input-wifi-pass", "input-wifi-enc", "input-wifi-hidden",
+        "v-fname", "v-lname", "v-org", "v-title", "v-phone", "v-email", "v-url",
+        "input-phone-num", "input-mail-to", "input-mail-sub", "input-mail-body",
+        "input-sms-num", "input-sms-msg", "input-wa-num", "input-wa-msg",
+        "select-error-correction"
+      ];
+      
+      inputs.forEach(id => {
+        document.getElementById(id).addEventListener("input", triggerQRUpdate);
+        document.getElementById(id).addEventListener("change", triggerQRUpdate);
+      });
+
+      // Color pickers
+      document.getElementById("color-picker-fg").addEventListener("input", (e) => {
+        config.dotsOptions.color = e.target.value;
+        triggerQRUpdate();
+      });
+      document.getElementById("color-picker-bg").addEventListener("input", (e) => {
+        config.backgroundOptions.color = e.target.value;
+        triggerQRUpdate();
+      });
+      document.getElementById("color-picker-corners").addEventListener("input", (e) => {
+        config.cornersSquareOptions.color = e.target.value;
+        config.cornersDotOptions.color = e.target.value;
+        triggerQRUpdate();
+      });
+
+      // Sliders
+      const sliderMargin = document.getElementById("slider-margin");
+      sliderMargin.addEventListener("input", (e) => {
+        config.margin = parseInt(e.target.value);
+        document.getElementById("lbl-margin").innerText = `Margin Buffer: ${config.margin}px`;
+        triggerQRUpdate();
+      });
+
+      const sliderSize = document.getElementById("slider-logo-size");
+      sliderSize.addEventListener("input", (e) => {
+        config.imageOptions.imageSize = parseFloat(e.target.value);
+        document.getElementById("lbl-logo-size").innerText = `Center Scale: ${config.imageOptions.imageSize}`;
+        triggerQRUpdate();
+      });
+
+      // Save Options
+      document.getElementById("btn-save-image").addEventListener("click", () => {
+        showStatus("Exporting asset structure...");
+        qrEngine.download({ name: "OPEN-QR-Asset", extension: "png" });
+      });
+
+      document.getElementById("btn-save-pdf").addEventListener("click", saveAsPDF);
+      document.getElementById("btn-share-qr").addEventListener("click", shareQRCode);
+    }
+
+    // Logo uploading
+    function setupFileUploading() {
+      const uploader = document.getElementById("logo-uploader");
+      const clearBtn = document.getElementById("btn-logo-remove");
+
+      uploader.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (evt) => {
+            config.image = evt.target.result;
+            showStatus("Branding identity linked");
+            triggerQRUpdate();
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+
+      clearBtn.addEventListener("click", () => {
+        config.image = "";
+        uploader.value = "";
+        showStatus("Corporate branding cleared");
+        triggerQRUpdate();
+      });
+    }
+
+    // Dynamic data compiler
+    function compileActiveData() {
+      const activeTab = document.querySelector(".tab-btn.active");
+      if (!activeTab) return "https://github.com/itsdotji";
+      
+      const type = activeTab.dataset.type;
+
+      switch(type) {
+        case "text":
+          return document.getElementById("input-raw-text").value || "https://github.com/itsdotji";
+        
+        case "wifi":
+          const ssid = document.getElementById("input-wifi-ssid").value || "SSID";
+          const pass = document.getElementById("input-wifi-pass").value || "";
+          const enc = document.getElementById("input-wifi-enc").value;
+          const hidden = document.getElementById("input-wifi-hidden").checked;
+          return `WIFI:S:${ssid};T:${enc};P:${pass};${hidden ? 'H:true' : ''};`;
+
+        case "vcard":
+          const fname = document.getElementById("v-fname").value || "";
+          const lname = document.getElementById("v-lname").value || "";
+          const org = document.getElementById("v-org").value || "";
+          const title = document.getElementById("v-title").value || "";
+          const tel = document.getElementById("v-phone").value || "";
+          const mail = document.getElementById("v-email").value || "";
+          const url = document.getElementById("v-url").value || "";
+          return `BEGIN:VCARD\nVERSION:3.0\nN:${lname};${fname};;;\nFN:${fname} ${lname}\nORG:${org}\nTITLE:${title}\nTEL;TYPE=CELL:${tel}\nEMAIL;TYPE=PREF,INTERNET:${mail}\nURL:${url}\nEND:VCARD`;
+
+        case "phone":
+          const num = document.getElementById("input-phone-num").value || "";
+          return `tel:${num}`;
+
+        case "email":
+          const mailTo = document.getElementById("input-mail-to").value || "";
+          const mailSub = document.getElementById("input-mail-sub").value || "";
+          const mailBody = document.getElementById("input-mail-body").value || "";
+          return `mailto:${mailTo}?subject=${encodeURIComponent(mailSub)}&body=${encodeURIComponent(mailBody)}`;
+
+        case "sms":
+          const smsNum = document.getElementById("input-sms-num").value || "";
+          const smsMsg = document.getElementById("input-sms-msg").value || "";
+          return `smsto:${smsNum}:${smsMsg}`;
+
+        case "whatsapp":
+          const waNum = document.getElementById("input-wa-num").value || "";
+          const waMsg = document.getElementById("input-wa-msg").value || "";
+          return `https://wa.me/${waNum}?text=${encodeURIComponent(waMsg)}`;
+
+        default:
+          return "https://github.com/itsdotji";
+      }
+    }
+
+    // Trigger update cycles
+    function triggerQRUpdate() {
+      if (!qrEngine) return;
+      config.data = compileActiveData();
+      config.qrOptions.errorCorrectionLevel = document.getElementById("select-error-correction").value;
+      qrEngine.update(config);
+    }
+
+    // Action: Save as PDF
+    function saveAsPDF() {
+      showStatus("Assembling vector report...");
+      const canvas = document.querySelector("#canvas-target canvas");
+      if (!canvas) {
+        showStatus("Error generating canvas.");
+        return;
+      }
+
+      const imgData = canvas.toDataURL("image/png");
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4"
+      });
+
+      const qrWidth = 110;
+      const xPos = (210 - qrWidth) / 2;
+      const yPos = 60;
+
+      // Corporate style layout formatting
+      doc.setFont("Helvetica", "bold");
+      doc.setFontSize(22);
+      doc.setTextColor(15, 23, 42); // Corporate slate
+      doc.text("OPEN QR DOCUMENT REPORT", 105, 36, { align: "center" });
+
+      doc.setFont("Helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(100, 116, 139);
+      doc.text("Offline cryptographic transaction vector mapping - Complies with local protocols.", 105, 43, { align: "center" });
+
+      doc.addImage(imgData, "PNG", xPos, yPos, qrWidth, qrWidth);
+
+      // Footer branding notes
+      doc.setFont("Helvetica", "bold");
+      doc.setFontSize(10);
+      doc.setTextColor(5, 150, 105); // Corporate green branding identity
+      doc.text("\"We are Quiet Romantic because of You\"", 105, 190, { align: "center" });
+
+      doc.setFont("Helvetica", "normal");
+      doc.setFontSize(8);
+      doc.setTextColor(148, 163, 184);
+      doc.text("© OPEN QR. All Rights Reserved. Rendered privately on user hardware under developer guidelines.", 105, 270, { align: "center" });
+
+      doc.save("OPEN-QR-Corporate-Report.pdf");
+      showStatus("PDF Report Downloaded");
+    }
+
+    // Action: Native System Share Hook
+    function shareQRCode() {
+      const canvas = document.querySelector("#canvas-target canvas");
+      if (!canvas) {
+        showStatus("Error compiling canvas");
+        return;
+      }
+
+      canvas.toBlob((blob) => {
+        const file = new File([blob], "open_qr.png", { type: "image/png" });
+        
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+          navigator.share({
+            files: [file],
+            title: "OPEN QR Code Asset",
+            text: "Generated privately and securely on OPEN QR."
+          })
+          .then(() => showStatus("Shared successfully!"))
+          .catch((err) => {
+            console.error(err);
+            copyTargetToClipboard();
+          });
+        } else {
+          copyTargetToClipboard();
+        }
+      }, "image/png");
+    }
+
+    // Fallback share logic
+    function copyTargetToClipboard() {
+      navigator.clipboard.writeText(config.data)
+        .then(() => showStatus("Link parameters copied!"))
+        .catch(() => showStatus("Sharing failed: Unsuitable client configuration"));
+    }
+
+    // Toast Alert Messages dispatcher
+    function showStatus(text) {
+      const toast = document.getElementById("status-toast");
+      toast.innerText = text;
+      toast.className = "toast-status show";
+      setTimeout(() => {
+        toast.className = "toast-status";
+      }, 2800);
+    }
+
+    // Local Dynamic HTML Documents Generator
+    function handleFooterNavigation(destination) {
+      if (destination === 'home') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        showStatus("Scrolled to Home");
+        return;
+      }
+
+      let title = "";
+      let htmlBody = "";
+
+      switch(destination) {
+        case "about":
+          title = "About Us";
+          htmlBody = `
+            <h2>1. Organization and Development Principles</h2>
+            <p><strong>OPEN QR</strong> is a high-security, client-side utility developed to fulfill demands for private, serverless, and trackless vector translation interfaces. Designed to streamline workflow assets without sending telemetry payloads to third parties.</p>
+            <h2>2. Architectural Integrity</h2>
+            <p>Unlike conventional web generators that monitor parameters, process payloads on external servers, or store cookies, our architecture processes 100% of data structures locally on the user processor. We preserve security integrity in offline air-gapped systems.</p>
+            <h2>3. Engineering Oversight</h2>
+            <p>This utility was engineered and organized by developer <strong>itsdotji (Nikhil Kumar)</strong> to supply the industry with highly performant, dependable open-source technology frameworks that safeguard consumer interests.</p>
+          `;
+          break;
+
+        case "privacy":
+          title = "Data Security & Privacy Policy";
+          htmlBody = `
+            <p><em>Security Classification: Public Document</em></p>
+            <h2>1. Security Isolation</h2>
+            <p>Your inputs, parameters, addresses, encryption keys, and logotypes remain isolated within the local browser container. We do not operate databases or call home scripts.</p>
+            <h2>2. Tracker Shielding Compliance</h2>
+            <p>We do not use advertising components, cookies, pixel telemetry, Google Analytics, or third-party web trackers. Your network traffic profile remains entirely unmonitored.</p>
+            <h2>3. Local Image Sandbox</h2>
+            <p>When files are selected for embedding, the system uses the <code>FileReader</code> API to transpile details locally into temporary in-memory base64 sequences. These assets do not interact with remote clouds.</p>
+          `;
+          break;
+
+        case "terms":
+          title = "Terms of Compliance & Usage";
+          htmlBody = `
+            <p><em>Effective Date: June 17, 2026</em></p>
+            <h2>1. Usage Framework</h2>
+            <p>OPEN QR supplies this vector processing engine free of payment barriers. You are granted an unexpiring license to utilize, print, and distribute assets generated here for commercial and enterprise targets.</p>
+            <h2>2. Scannability Disclaimer</h2>
+            <p>Users must test generated materials on target devices under actual deployment environments prior to volume print commitments. Scannability performance rests entirely on parameters selected by the user (contrast ratio, scale margins, surface physics, etc.).</p>
+          `;
+          break;
+
+        case "licence":
+          title = "MIT License";
+          htmlBody = `
+            <p><strong>MIT License Compliance Protocol</strong></p>
+            <p>Copyright (c) 2026 <strong>itsdotji (Nikhil Kumar)</strong></p>
+            <p>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:</p>
+            <p>The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.</p>
+            <p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
+          `;
+          break;
+
+        case "open-source":
+          title = "Open Source Framework Registry";
+          htmlBody = `
+            <h2>Transparency and Collaboration Protocols</h2>
+            <p>OPEN QR operates openly. Code integrity can be audited by third-party security teams, permitting total visibility into execution steps.</p>
+            <h2>Core Modular Dependencies</h2>
+            <ul>
+              <li><strong>qr-code-styling:</strong> Local vector matrix layout compiler.</li>
+              <li><strong>jsPDF:</strong> Local vector report generator.</li>
+            </ul>
+            <h2>Contribution and Peer Review</h2>
+            <p>If you identify opportunities to optimize rendering speeds, refine layout calculations, or scale performance, feel free to submit compliance proposals directly through the GitHub development repository.</p>
+          `;
+          break;
+      }
+
+      // Dynamic assembly of local standalone document
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>${title} - OPEN QR Corporate Portal</title>
+          <style>
+            body {
+              font-family: 'Inter', system-ui, sans-serif;
+              background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+              color: #0f172a;
+              margin: 0;
+              padding: 48px 24px;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              min-height: 100vh;
+            }
+            .content-box {
+              background: #ffffff;
+              border-radius: 8px;
+              box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+              padding: 48px;
+              max-width: 800px;
+              width: 100%;
+              border-top: 4px solid #059669;
+              border-left: 1px solid #e2e8f0;
+              border-right: 1px solid #e2e8f0;
+              border-bottom: 1px solid #e2e8f0;
+            }
+            h1 {
+              font-size: 1.6rem;
+              margin-top: 0;
+              color: #0f172a;
+              border-bottom: 1px solid #cbd5e1;
+              padding-bottom: 16px;
+              letter-spacing: -0.02em;
+              text-transform: uppercase;
+            }
+            h2 {
+              font-size: 1rem;
+              color: #059669;
+              margin-top: 32px;
+              margin-bottom: 10px;
+              text-transform: uppercase;
+              letter-spacing: 0.03em;
+            }
+            p, li {
+              font-size: 0.9rem;
+              line-height: 1.6;
+              color: #475569;
+              margin-bottom: 16px;
+            }
+            .btn-close {
+              display: inline-block;
+              background-color: #0f172a;
+              color: #059669;
+              padding: 10px 20px;
+              border-radius: 4px;
+              text-decoration: none;
+              font-weight: 700;
+              margin-top: 32px;
+              border: none;
+              cursor: pointer;
+              transition: all 0.2s;
+              text-transform: uppercase;
+              font-size: 0.75rem;
+              letter-spacing: 0.05em;
+            }
+            .btn-close:hover {
+              background-color: #1e293b;
+            }
+            footer {
+              margin-top: 48px;
+              padding-top: 24px;
+              border-top: 1px solid #e2e8f0;
+              font-size: 0.75rem;
+              color: #64748b;
+              text-align: center;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="content-box">
+            <h1>${title}</h1>
+            ${htmlBody}
+            <button class="btn-close" onclick="window.close()">Close Document</button>
+            <footer>
+              &copy; OPEN QR. "We are Quiet Romantic because of You". All Rights Reserved.
+            </footer>
+          </div>
+        </body>
+        </html>
+      `;
+
+      const blob = new Blob([htmlContent], { type: "text/html" });
+      const url = URL.createObjectURL(blob);
+      window.open(url, "_blank");
+    }
+  </script>
+</body>
+</html>
